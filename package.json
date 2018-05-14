@@ -1,0 +1,45 @@
+{
+  "name": "god-state",
+  "version": "0.1.0",
+  "description": "Convenient state management for React",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^16.3.0"
+  },
+  "main": "dist/commonjs/index.js",
+  "module": "dist/es/index.js",
+  "jsnext:main": "dist/es/index.js",
+  "scripts": {
+    "build:es": "cross-env babel src --out-dir dist/es",
+    "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --out-dir dist/commonjs",
+    "build:umd": "cross-env NODE_ENV=production webpack",
+    "build": "npm run build:es && npm run build:commonjs && npm run build:umd"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-lodash": "^3.3.2",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "babel-preset-es2015-no-commonjs": "^0.0.2",
+    "babel-preset-stage-2": "^6.24.1",
+    "cross-env": "^5.1.5",
+    "react": "^16.3.2",
+    "webpack": "^4.8.2",
+    "webpack-cli": "^2.1.3"
+  },
+  "babel": {
+    "presets": [
+      "es2015-no-commonjs",
+      "stage-2"
+    ],
+    "plugins": ["lodash"],
+    "env": {
+      "commonjs": {
+        "plugins": [
+          "lodash",
+          "transform-es2015-modules-commonjs"
+        ]
+      }
+    }
+  }
+}
