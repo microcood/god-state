@@ -19,6 +19,8 @@
     "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --out-dir dist/commonjs",
     "build:umd": "cross-env NODE_ENV=production webpack",
     "build": "npm run build:es && npm run build:commonjs && npm run build:umd",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "prepublish": "npm run build"
   },
   "files": [
@@ -48,6 +50,10 @@
       }
     }
   },
+  "eslintConfig": {
+    "extends": "standard",
+    "rules": {}
+  },
   "peerDependencies": {
     "react": "^16.3.0"
   },
@@ -59,6 +65,12 @@
     "babel-preset-es2015-no-commonjs": "^0.0.2",
     "babel-preset-stage-2": "^6.24.1",
     "cross-env": "^5.1.5",
+    "eslint": "^4.19.1",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.11.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.7.0",
+    "eslint-plugin-standard": "^3.1.0",
     "react": "^16.3.2",
     "webpack": "^4.8.2",
     "webpack-cli": "^2.1.3"
