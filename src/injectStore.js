@@ -5,7 +5,6 @@ import {each} from 'lodash'
 function wrapWithConsumer (name, Component) {
   return class ConsumerWrapper extends React.Component {
     render () {
-      console.log('name ', name)
       const passProps = this.props
       return React.createElement(
         getContext(name).Consumer,
@@ -17,7 +16,7 @@ function wrapWithConsumer (name, Component) {
   }
 }
 
-export function injectStore (...storeNames) {
+export default function injectStore (...storeNames) {
   return function (Component) {
     return class InjectedComponent extends React.Component {
       constructor (props) {

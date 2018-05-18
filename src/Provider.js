@@ -22,7 +22,7 @@ function createStoreProvider (store, Provider) {
   }
 }
 
-export class Provider extends React.Component {
+export default class Provider extends React.Component {
   constructor (props) {
     super(props)
     each(this.props.stores, (store, name) => {
