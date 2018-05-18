@@ -15,12 +15,12 @@
     "url": "https://github.com/microcood/god-state/issues"
   },
   "scripts": {
-    "build:es": "cross-env babel src --out-dir dist/es",
-    "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --out-dir dist/commonjs",
+    "build:es": "cross-env babel src --out-dir dist/es --ignore __tests__",
+    "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --out-dir dist/commonjs --ignore __tests__",
     "build:umd": "cross-env NODE_ENV=production webpack",
     "build": "npm run build:es && npm run build:commonjs && npm run build:umd",
     "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
+    "test": "jest",
     "prepublish": "npm run build"
   },
   "files": [
@@ -47,18 +47,27 @@
           "lodash",
           "transform-es2015-modules-commonjs"
         ]
+      },
+      "test": {
+        "plugins": [
+          "transform-es2015-modules-commonjs"
+        ]
       }
     }
   },
   "eslintConfig": {
     "extends": "standard",
-    "rules": {}
+    "rules": {},
+    "env": {
+      "jest": true
+    }
   },
   "peerDependencies": {
     "react": "^16.3.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "babel-jest": "^22.4.3",
     "babel-loader": "^7.1.4",
     "babel-plugin-lodash": "^3.3.2",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
@@ -71,7 +80,10 @@
     "eslint-plugin-node": "^6.0.1",
     "eslint-plugin-promise": "^3.7.0",
     "eslint-plugin-standard": "^3.1.0",
+    "jest": "^22.4.3",
     "react": "^16.3.2",
+    "react-dom": "^16.3.2",
+    "react-testing-library": "^3.1.0",
     "webpack": "^4.8.2",
     "webpack-cli": "^2.1.3"
   },
