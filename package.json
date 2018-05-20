@@ -39,7 +39,8 @@
       "stage-2"
     ],
     "plugins": [
-      "lodash"
+      "lodash",
+      "transform-react-jsx"
     ],
     "env": {
       "commonjs": {
@@ -56,8 +57,14 @@
     }
   },
   "eslintConfig": {
-    "extends": "standard",
-    "rules": {},
+    "extends": [
+      "canonical"
+    ],
+    "plugins": [],
+    "rules": {
+      "import/no-unassigned-import": 0,
+      "no-restricted-syntax": 0
+    },
     "env": {
       "jest": true
     }
@@ -67,19 +74,18 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.2.3",
     "babel-jest": "^22.4.3",
     "babel-loader": "^7.1.4",
     "babel-plugin-lodash": "^3.3.2",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-es2015-no-commonjs": "^0.0.2",
     "babel-preset-stage-2": "^6.24.1",
     "cross-env": "^5.1.5",
+    "dom-testing-library": "^2.3.2",
     "eslint": "^4.19.1",
-    "eslint-config-standard": "^11.0.0",
-    "eslint-plugin-import": "^2.11.0",
-    "eslint-plugin-node": "^6.0.1",
-    "eslint-plugin-promise": "^3.7.0",
-    "eslint-plugin-standard": "^3.1.0",
+    "eslint-config-canonical": "^9.3.2",
     "jest": "^22.4.3",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",

@@ -1,12 +1,13 @@
-import React from 'react'
+import React from 'react';
 
-let contexts = {}
+const contexts = {};
 
-export function createContext (name, store) {
-  contexts[name] = React.createContext(store)
-  return contexts[name]
-}
+export const createContext = function (name, store) {
+  contexts[name] = React.createContext(store);
 
-export function getContext (name) {
-  return contexts[name]
-}
+  return contexts[name];
+};
+
+export const getContext = function (name) {
+  return contexts[name];
+};

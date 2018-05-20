@@ -1,38 +1,44 @@
-import React from 'react'
-import {createContext} from './contexts'
-import {each, cloneDeep, functions, omit} from 'lodash'
+import React from 'react';
+import {each, cloneDeep, functions, omit} from 'lodash';
+import {createContext} from './contexts';
 
-function createStoreProvider (store, Provider) {
+const createStoreProvider = function (store, ProviderElement) {
   return class StoreProvider extends React.Component {
     constructor (props) {
-      super(props)
-      this.state = store
-      this._stateClone = cloneDeep(store)
-      let methods = functions(this.state)
+      super(props);
+      this.state = store;
+      this.stateClone = cloneDeep(store);
+      const methods = functions(this.state);
+
       each(methods, (method) => {
         this.state[method] = (...args) => {
-          this._stateClone[method](...args)
-          this.setState(omit(this._stateClone, methods))
-        }
-      })
+          this.stateClone[method](...args);
+          this.setState(omit(this._stateClone, methods));
+        };
+      });
     }
+
     render () {
-      return React.createElement(Provider, {value: this.state}, this.props.children)
+      return React.createElement(ProviderElement, {value: this.state}, this.props.children);
     }
-  }
-}
+  };
+};
 
 export default class Provider extends React.Component {
   constructor (props) {
-    super(props)
+    super(props);
     each(this.props.stores, (store, name) => {
-      const {Provider} = createContext(name, store)
+      const {ProviderElement} = createContext(name, store);
+
       this.providerTree = React.createElement(
-        createStoreProvider(store, Provider),
+        createStoreProvider(store, ProviderElement),
         {key: `${name}Provider`},
-        this.providerTree ? [this.providerTree] : [this.props.children]
-      )
-    })
+        this.providerTree ? [this.providerTree] : [this.props.children],
+      );
+    });
   }
-  render () { return this.providerTree }
+
+  render () {
+    return this.providerTree;
+  }
 }
