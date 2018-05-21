@@ -15,7 +15,7 @@ export default function (store, ProviderElement) {
           this.setState(omit(this.stateClone, methods));
         };
       });
-      this.state = Object.assign(store, wrappedMethods);
+      this.state = Object.assign({}, store, wrappedMethods);
     }
 
     render () {
