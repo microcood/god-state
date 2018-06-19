@@ -1,18 +1,30 @@
 import React from 'react';
-import {cloneDeep, functions, forEach, omit} from 'lodash';
+import {cloneDeep, isFunction, functions, omit} from 'lodash';
 
 export default function (store, ProviderElement) {
   return class StoreProvider extends React.Component {
     constructor (props) {
       super(props);
-      this.stateClone = cloneDeep(store);
-      const methods = functions(this.stateClone);
+
+      if (store.constructor === Object) {
+        this.stateClone = cloneDeep(store);
+        this.methodNames = functions(store);
+      } else {
+        const storePrototype = Object.getPrototypeOf(store);
+
+        this.stateClone = Object.assign(Object.create(storePrototype), store);
+        this.methodNames = Object.getOwnPropertyNames(storePrototype)
+          .filter((name) => {
+            return isFunction(storePrototype[name]) && name !== 'constructor';
+          });
+      }
+
       const wrappedMethods = {};
 
-      forEach(methods, (method) => {
+      this.methodNames.forEach((method) => {
         wrappedMethods[method] = (...args) => {
           this.stateClone[method](...args);
-          this.setState(omit(this.stateClone, methods));
+          this.setState(omit(this.stateClone, this.methodNames));
         };
       });
       this.state = Object.assign({}, store, wrappedMethods);

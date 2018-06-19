@@ -185,3 +185,28 @@ test('injected components rerender independently', () => {
   Simulate.click(getByText(/increase doubleCounter/));
   expect([renderedCounter, renderedDoubleCounter]).toEqual([2, 2]);
 });
+
+test('support class methods', () => {
+  class CounterStore {
+    value = 0
+    increase () {
+      this.value++;
+    }
+  }
+  const Counter = injectStore('counter')(
+    ({counter}) => {
+      return <div>
+        <div>value: {counter.value}</div>
+        <button onClick={counter.increase}>increase value</button>
+      </div>;
+    }
+  );
+  const {getByText} = render(
+    <Provider stores={{counter: new CounterStore()}}><Counter /></Provider>
+  );
+
+  expect(getByText(/value:/)).toHaveTextContent('value: 0');
+
+  Simulate.click(getByText(/increase value/));
+  expect(getByText(/value:/)).toHaveTextContent('value: 1');
+});
