@@ -22,9 +22,15 @@ export default function (store, ProviderElement) {
       const wrappedMethods = {};
 
       this.methodNames.forEach((method) => {
-        wrappedMethods[method] = (...args) => {
-          this.stateClone[method](...args);
+        wrappedMethods[method] = async (...args) => {
+          let result = this.stateClone[method](...args);
+
+          if (result && result.constructor === Promise) {
+            result = await result;
+          }
           this.setState(omit(this.stateClone, this.methodNames));
+
+          return result;
         };
       });
       this.state = Object.assign({}, store, wrappedMethods);

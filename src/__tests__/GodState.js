@@ -1,6 +1,6 @@
 import React from 'react';
 import 'dom-testing-library/extend-expect';
-import {render, Simulate} from 'react-testing-library';
+import {render, Simulate, wait} from 'react-testing-library';
 import Provider from '../Provider';
 import injectStore from '../injectStore';
 
@@ -209,4 +209,39 @@ test('support class methods', () => {
 
   Simulate.click(getByText(/increase value/));
   expect(getByText(/value:/)).toHaveTextContent('value: 1');
+});
+
+test('support async class methods', async () => {
+  const getDataAsync = function () {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(77);
+      }, 200);
+    });
+  };
+
+  class Store {
+    value = 0
+    async changeData () {
+      this.value = await getDataAsync();
+    }
+  }
+  const Counter = injectStore('counter')(
+    ({counter}) => {
+      return <div>
+        <div>value: {counter.value}</div>
+        <button onClick={counter.changeData}>change value</button>
+      </div>;
+    }
+  );
+  const {getByText} = render(
+    <Provider stores={{counter: new Store()}}><Counter /></Provider>
+  );
+
+  expect(getByText(/value:/)).toHaveTextContent('value: 0');
+
+  Simulate.click(getByText(/change value/));
+  await wait(() => {
+    expect(getByText(/value:/)).toHaveTextContent('value: 77');
+  }, {timeout: 300});
 });
