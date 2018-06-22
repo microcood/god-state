@@ -1,6 +1,6 @@
 {
   "name": "god-state",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Convenient state management for React",
   "license": "MIT",
   "main": "dist/commonjs/index.js",
