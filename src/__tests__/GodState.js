@@ -1,3 +1,4 @@
+/* eslint react/no-multi-comp: 0 */
 import React from 'react';
 import 'dom-testing-library/extend-expect';
 import {render, Simulate, wait} from 'react-testing-library';
@@ -244,4 +245,46 @@ test('support async class methods', async () => {
   await wait(() => {
     expect(getByText(/value:/)).toHaveTextContent('value: 77');
   }, {timeout: 300});
+});
+
+test('method returns after state change', async () => {
+  let methodResult;
+  let counterValueAfterMethod;
+
+  class Store {
+    value = 0
+    changeData () {
+      this.value = 77;
+
+      return 42;
+    }
+  }
+
+  class Comp extends React.Component {
+    handleClick = async () => {
+      methodResult = await this.props.counter.changeData();
+      counterValueAfterMethod = this.props.counter.value;
+    }
+
+    render () {
+      return <div>
+        <div>value: {this.props.counter.value}</div>
+        <button onClick={this.handleClick}>change value</button>
+      </div>;
+    }
+  }
+  const Counter = injectStore('counter')(Comp);
+
+  const {getByText} = render(
+    <Provider stores={{counter: new Store()}}><Counter /></Provider>
+  );
+
+  expect(getByText(/value:/)).toHaveTextContent('value: 0');
+
+  Simulate.click(getByText(/change value/));
+  await wait();
+  expect(methodResult).toEqual(42);
+  expect(counterValueAfterMethod).toEqual(77);
+
+  expect(getByText(/value:/)).toHaveTextContent('value: 77');
 });

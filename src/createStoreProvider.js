@@ -28,9 +28,12 @@ export default function (store, ProviderElement) {
           if (result && result.constructor === Promise) {
             result = await result;
           }
-          this.setState(omit(this.stateClone, this.methodNames));
 
-          return result;
+          return new Promise((resolve) => {
+            this.setState(omit(this.stateClone, this.methodNames), () => {
+              resolve(result);
+            });
+          });
         };
       });
       this.state = Object.assign({}, store, wrappedMethods);
