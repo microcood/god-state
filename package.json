@@ -35,23 +35,37 @@
   ],
   "babel": {
     "presets": [
-      "es2015-no-commonjs",
-      "stage-2"
+      [
+        "@babel/preset-env",
+        {
+          "modules": false,
+          "targets": {
+            "node": "current"
+          }
+        }
+      ]
     ],
     "plugins": [
       "lodash",
-      "transform-react-jsx"
+      "@babel/plugin-transform-react-jsx",
+      "@babel/plugin-proposal-class-properties",
+      [
+        "@babel/plugin-proposal-decorators",
+        {
+          "legacy": true
+        }
+      ]
     ],
     "env": {
       "commonjs": {
         "plugins": [
           "lodash",
-          "transform-es2015-modules-commonjs"
+          "@babel/plugin-transform-modules-commonjs"
         ]
       },
       "test": {
         "plugins": [
-          "transform-es2015-modules-commonjs"
+          "@babel/plugin-transform-modules-commonjs"
         ]
       }
     }
@@ -75,15 +89,15 @@
     "react": "^16.3.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
+    "@babel/cli": "^7.5.5",
+    "@babel/plugin-proposal-decorators": "^7.4.4",
+    "@babel/plugin-transform-modules-commonjs": "^7.5.0",
+    "@babel/plugin-transform-react-jsx": "^7.3.0",
+    "@babel/preset-env": "^7.5.5",
     "babel-eslint": "^8.2.3",
     "babel-jest": "^24.8.0",
-    "babel-loader": "^7.1.4",
+    "babel-loader": "^8.0.6",
     "babel-plugin-lodash": "^3.3.2",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
-    "babel-plugin-transform-react-jsx": "^6.24.1",
-    "babel-preset-es2015-no-commonjs": "^0.0.2",
-    "babel-preset-stage-2": "^6.24.1",
     "cross-env": "^5.1.5",
     "dom-testing-library": "^2.3.2",
     "eslint": "^4.19.1",
@@ -97,6 +111,7 @@
     "webpack-cli": "^3.3.6"
   },
   "dependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
     "lodash": "^4.17.10"
   }
 }
