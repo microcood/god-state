@@ -15,8 +15,8 @@
     "url": "https://github.com/microcood/god-state/issues"
   },
   "scripts": {
-    "build:es": "cross-env babel src --out-dir dist/es --ignore __tests__",
-    "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --out-dir dist/commonjs --ignore __tests__",
+    "build:es": "cross-env babel src --out-dir dist/es --ignore src/__tests__/*",
+    "build:commonjs": "cross-env BABEL_ENV=commonjs babel src --out-dir dist/commonjs --ignore src/__tests__/*",
     "build:umd": "cross-env NODE_ENV=production webpack",
     "build": "npm run build:es && npm run build:commonjs && npm run build:umd",
     "lint": "eslint src",
