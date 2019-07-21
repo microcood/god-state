@@ -4,37 +4,37 @@ import 'dom-testing-library/extend-expect';
 import {render, Simulate, wait} from 'react-testing-library';
 import Provider from '../Provider';
 import injectStore from '../injectStore';
+import {createStore, useStore} from '../newVersion';
 
 test('simple render of the value', () => {
-  const Counter = injectStore('counter')(
-    ({counter}) => {
-      return <div>counter value: {counter.value}</div>;
-    }
-  );
+  createStore('counter', {value: 0});
+  const Counter = () => {
+    const [counter] = useStore('counter');
+
+    return <div>counter value: {counter.value}</div>;
+  };
   const {getByText} = render(
-    <Provider stores={{counter: {value: 0}}}><Counter /></Provider>
+    <Counter />
   );
 
   expect(getByText(/value:/)).toHaveTextContent('value: 0');
 });
 
 test('value changes after method call', () => {
-  const store = {
-    increase () {
-      this.value++;
-    },
-    value: 0
+  createStore('counter', {value: 0});
+  const Counter = () => {
+    const [counter, changeCounter] = useStore('counter');
+    const increase = function () {
+      changeCounter({value: counter.value + 1});
+    };
+
+    return <div>
+      <div>value: {counter.value}</div>
+      <button onClick={increase}>increase value</button>
+    </div>;
   };
-  const Counter = injectStore('counter')(
-    ({counter}) => {
-      return <div>
-        <div>value: {counter.value}</div>
-        <button onClick={counter.increase}>increase value</button>
-      </div>;
-    }
-  );
   const {getByText} = render(
-    <Provider stores={{counter: store}}><Counter /></Provider>
+    <Counter />
   );
 
   expect(getByText(/value:/)).toHaveTextContent('value: 0');
@@ -44,20 +44,18 @@ test('value changes after method call', () => {
 });
 
 test('intermediate components do not rerender', () => {
-  const store = {
-    increase () {
-      this.value++;
-    },
-    value: 0
+  createStore('counter', {value: 0});
+  const Counter = () => {
+    const [counter, changeCounter] = useStore('counter');
+    const increase = function () {
+      changeCounter({value: counter.value + 1});
+    };
+
+    return <div>
+      <div>value: {counter.value}</div>
+      <button onClick={increase}>increase value</button>
+    </div>;
   };
-  const Counter = injectStore('counter')(
-    ({counter}) => {
-      return <div>
-        <div>value: {counter.value}</div>
-        <button onClick={counter.increase}>increase value</button>
-      </div>;
-    }
-  );
   let renderCounts = 0;
 
   class Intermediate extends React.Component {
@@ -69,11 +67,9 @@ test('intermediate components do not rerender', () => {
   }
 
   const {getByText} = render(
-    <Provider stores={{counter: store}}>
-      <Intermediate>
-        <Counter />
-      </Intermediate>
-    </Provider>
+    <Intermediate>
+      <Counter />
+    </Intermediate>
   );
 
   Simulate.click(getByText(/increase value/));
@@ -83,44 +79,36 @@ test('intermediate components do not rerender', () => {
 });
 
 test('components can be injected with multiple stores', () => {
-  const store = {
-    increase () {
-      this.value++;
-    },
-    value: 0
-  };
-  const store2 = {
-    increase () {
-      this.value += 2;
-    },
-    value: 0
-  };
+  createStore('counter', {value: 0});
+  createStore('doubleCounter', {value: 0});
+  createStore('tripleCounter', {value: 0});
 
-  const store3 = {
-    increase () {
-      this.value += 3;
-    },
-    value: 0
-  };
-  const Counter = injectStore('counter', 'doubleCounter', 'tripleCounter')(
-    ({counter, doubleCounter, tripleCounter}) => {
-      return <div>
-        <div>values: {counter.value}:{doubleCounter.value}:{tripleCounter.value}</div>
-        <button onClick={counter.increase}>increase counter</button>
-        <button onClick={doubleCounter.increase}>increase doubleCounter</button>
-        <button onClick={tripleCounter.increase}>increase tripleCounter</button>
+  const Counter = () => {
+    const [counter, changeCounter] = useStore('counter');
+    const increase = function () {
+      changeCounter({value: counter.value + 1});
+    };
 
-      </div>;
-    }
-  );
+    const [doubleCounter, changeDoubleCounter] = useStore('doubleCounter');
+    const doubleIncrease = function () {
+      changeDoubleCounter({value: doubleCounter.value + 2});
+    };
+
+    const [tripleCounter, changeTripleCounter] = useStore('tripleCounter');
+    const tripleIncrease = function () {
+      changeTripleCounter({value: tripleCounter.value + 3});
+    };
+
+    return <div>
+      <div>values: {counter.value}:{doubleCounter.value}:{tripleCounter.value}</div>
+      <button onClick={increase}>increase counter</button>
+      <button onClick={doubleIncrease}>increase doubleCounter</button>
+      <button onClick={tripleIncrease}>increase tripleCounter</button>
+
+    </div>;
+  };
   const {getByText} = render(
-    <Provider stores={{
-      counter: store,
-      doubleCounter: store2,
-      tripleCounter: store3
-    }}>
-      <Counter />
-    </Provider>
+    <Counter />
   );
 
   Simulate.click(getByText(/increase counter/));
@@ -134,48 +122,41 @@ test('components can be injected with multiple stores', () => {
 });
 
 test('injected components rerender independently', () => {
-  const store = {
-    increase () {
-      this.value++;
-    },
-    value: 0
-  };
-  const store2 = {
-    increase () {
-      this.value += 2;
-    },
-    value: 0
-  };
+  createStore('counter', {value: 0});
+  createStore('doubleCounter', {value: 0});
   let renderedCounter = 0;
   let renderedDoubleCounter = 0;
 
-  const Counter = injectStore('counter')(
-    ({counter}) => {
-      renderedCounter++;
+  const Counter = () => {
+    const [counter, changeCounter] = useStore('counter');
+    const increase = function () {
+      changeCounter({value: counter.value + 1});
+    };
 
-      return <div>
-        <button onClick={counter.increase}>increase counter</button>
-      </div>;
-    }
-  );
-  const DoubleCounter = injectStore('doubleCounter')(
-    ({doubleCounter}) => {
-      renderedDoubleCounter++;
+    renderedCounter++;
 
-      return <div>
-        <button onClick={doubleCounter.increase}>increase doubleCounter</button>
-      </div>;
-    }
-  );
+    return <div>
+      <button onClick={increase}>increase counter</button>
+    </div>;
+  };
+  const DoubleCounter = () => {
+    const [doubleCounter, changeDoubleCounter] = useStore('doubleCounter');
+    const doubleIncrease = function () {
+      changeDoubleCounter({value: doubleCounter.value + 2});
+    };
+
+    renderedDoubleCounter++;
+
+    return <div>
+      <button onClick={doubleIncrease}>increase doubleCounter</button>
+    </div>;
+  };
 
   const {getByText} = render(
-    <Provider stores={{
-      counter: store,
-      doubleCounter: store2
-    }}>
+    <div>
       <Counter />
       <DoubleCounter />
-    </Provider>
+    </div>
   );
 
   expect([renderedCounter, renderedDoubleCounter]).toEqual([1, 1]);
@@ -187,104 +168,137 @@ test('injected components rerender independently', () => {
   expect([renderedCounter, renderedDoubleCounter]).toEqual([2, 2]);
 });
 
-test('support class methods', () => {
-  class CounterStore {
-    value = 0
-    increase () {
-      this.value++;
-    }
-  }
-  const Counter = injectStore('counter')(
-    ({counter}) => {
-      return <div>
-        <div>value: {counter.value}</div>
-        <button onClick={counter.increase}>increase value</button>
-      </div>;
-    }
-  );
+test('custom hook support', () => {
+  createStore('counter', {value: 0});
+  const useCounter = function () {
+    const [counter, changeCounter] = useStore('counter');
+    const increase = function () {
+      changeCounter({value: counter.value + 1});
+    };
+
+    return {
+      ...counter,
+      increase
+    };
+  };
+  const Counter = () => {
+    const counter = useCounter();
+
+    return <div>
+      <div>value: {counter.value}</div>
+      <button onClick={counter.increase}>increase value</button>
+    </div>;
+  };
   const {getByText} = render(
-    <Provider stores={{counter: new CounterStore()}}><Counter /></Provider>
+    <Counter />
   );
 
   expect(getByText(/value:/)).toHaveTextContent('value: 0');
 
   Simulate.click(getByText(/increase value/));
   expect(getByText(/value:/)).toHaveTextContent('value: 1');
+  Simulate.click(getByText(/increase value/));
+  expect(getByText(/value:/)).toHaveTextContent('value: 2');
 });
 
-test('support async class methods', async () => {
-  const getDataAsync = function () {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(77);
-      }, 200);
-    });
-  };
+// test('support class methods', () => {
+//   class CounterStore {
+//     value = 0
+//     increase () {
+//       this.value++;
+//     }
+//   }
+//   const Counter = injectStore('counter')(
+//     ({counter}) => {
+//       return <div>
+//         <div>value: {counter.value}</div>
+//         <button onClick={counter.increase}>increase value</button>
+//       </div>;
+//     }
+//   );
+//   const {getByText} = render(
+//     <Provider stores={{counter: new CounterStore()}}><Counter /></Provider>
+//   );
 
-  class Store {
-    value = 0
-    async changeData () {
-      this.value = await getDataAsync();
-    }
-  }
-  const Counter = injectStore('counter')(
-    ({counter}) => {
-      return <div>
-        <div>value: {counter.value}</div>
-        <button onClick={counter.changeData}>change value</button>
-      </div>;
-    }
-  );
-  const {getByText} = render(
-    <Provider stores={{counter: new Store()}}><Counter /></Provider>
-  );
+//   expect(getByText(/value:/)).toHaveTextContent('value: 0');
 
-  expect(getByText(/value:/)).toHaveTextContent('value: 0');
+//   Simulate.click(getByText(/increase value/));
+//   expect(getByText(/value:/)).toHaveTextContent('value: 1');
+// });
 
-  Simulate.click(getByText(/change value/));
-  await wait(() => {
-    expect(getByText(/value:/)).toHaveTextContent('value: 77');
-  }, {timeout: 300});
-});
+// test('support async class methods', async () => {
+//   const getDataAsync = function () {
+//     return new Promise((resolve) => {
+//       setTimeout(() => {
+//         resolve(77);
+//       }, 200);
+//     });
+//   };
 
-test('method returns after state change', async () => {
-  let methodResult;
-  let counterValueAfterMethod;
+//   class Store {
+//     value = 0
+//     async changeData () {
+//       this.value = await getDataAsync();
+//     }
+//   }
+//   const Counter = injectStore('counter')(
+//     ({counter}) => {
+//       return <div>
+//         <div>value: {counter.value}</div>
+//         <button onClick={counter.changeData}>change value</button>
+//       </div>;
+//     }
+//   );
+//   const {getByText} = render(
+//     <Provider stores={{counter: new Store()}}><Counter /></Provider>
+//   );
 
-  class Store {
-    value = 0
-    changeData () {
-      this.value = 77;
+//   expect(getByText(/value:/)).toHaveTextContent('value: 0');
 
-      return 42;
-    }
-  }
+//   Simulate.click(getByText(/change value/));
+//   await wait(() => {
+//     expect(getByText(/value:/)).toHaveTextContent('value: 77');
+//   }, {timeout: 300});
+// });
 
-  class Comp extends React.Component {
-    handleClick = async () => {
-      methodResult = await this.props.counter.changeData();
-      counterValueAfterMethod = this.props.counter.value;
-    }
+// test('method returns after state change', async () => {
+//   let methodResult;
+//   let counterValueAfterMethod;
 
-    render () {
-      return <div>
-        <div>value: {this.props.counter.value}</div>
-        <button onClick={this.handleClick}>change value</button>
-      </div>;
-    }
-  }
-  const Counter = injectStore('counter')(Comp);
+//   class Store {
+//     value = 0
+//     changeData () {
+//       this.value = 77;
 
-  const {getByText} = render(
-    <Provider stores={{counter: new Store()}}><Counter /></Provider>
-  );
+//       return 42;
+//     }
+//   }
 
-  expect(getByText(/value:/)).toHaveTextContent('value: 0');
+//   class Comp extends React.Component {
+//     handleClick = async () => {
+//       methodResult = await this.props.counter.changeData();
+//       counterValueAfterMethod = this.props.counter.value;
+//     }
 
-  Simulate.click(getByText(/change value/));
-  await wait();
-  expect(methodResult).toEqual(42);
-  expect(counterValueAfterMethod).toEqual(77);
+//     render () {
+//       return <div>
+//         <div>value: {this.props.counter.value}</div>
+//         <button onClick={this.handleClick}>change value</button>
+//       </div>;
+//     }
+//   }
+//   const Counter = injectStore('counter')(Comp);
 
-  expect(getByText(/value:/)).toHaveTextContent('value: 77');
-});
+//   const {getByText} = render(
+//     <Provider stores={{counter: new Store()}}><Counter /></Provider>
+//   );
+
+//   expect(getByText(/value:/)).toHaveTextContent('value: 0');
+
+//   Simulate.click(getByText(/change value/));
+//   await wait();
+//   expect(methodResult).toEqual(42);
+//   expect(counterValueAfterMethod).toEqual(77);
+
+//   expect(getByText(/value:/)).toHaveTextContent('value: 77');
+// });
