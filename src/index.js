@@ -7,6 +7,7 @@ import React, {
 import { entries } from 'lodash'
 
 const ctxs = {}
+
 const registerService = (name, state) => {
   ctxs[name] = createContext()
   return function Provider({ children }) {
