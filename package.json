@@ -104,6 +104,7 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
     "@babel/plugin-proposal-decorators": "^7.4.4",
     "@babel/plugin-transform-modules-commonjs": "^7.5.0",
     "@babel/plugin-transform-react-jsx": "^7.3.0",
@@ -128,7 +129,6 @@
     "webpack-cli": "^3.3.6"
   },
   "dependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.5.5",
     "lodash": "^4.17.10"
   }
 }
