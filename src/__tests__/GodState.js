@@ -201,104 +201,45 @@ test('custom hook support', () => {
   expect(getByText(/value:/)).toHaveTextContent('value: 2');
 });
 
-// test('support class methods', () => {
-//   class CounterStore {
-//     value = 0
-//     increase () {
-//       this.value++;
-//     }
-//   }
-//   const Counter = injectStore('counter')(
-//     ({counter}) => {
-//       return <div>
-//         <div>value: {counter.value}</div>
-//         <button onClick={counter.increase}>increase value</button>
-//       </div>;
-//     }
-//   );
-//   const {getByText} = render(
-//     <Provider stores={{counter: new CounterStore()}}><Counter /></Provider>
-//   );
+test('store updates multiple components', () => {
+  createStore('counter', {value: 0});
+  const useCounter = function () {
+    const [counter, changeCounter] = useStore('counter');
+    const increase = function () {
+      changeCounter({value: counter.value + 1});
+    };
 
-//   expect(getByText(/value:/)).toHaveTextContent('value: 0');
+    return {
+      ...counter,
+      increase
+    };
+  };
+  const Counter = () => {
+    const counter = useCounter();
 
-//   Simulate.click(getByText(/increase value/));
-//   expect(getByText(/value:/)).toHaveTextContent('value: 1');
-// });
+    return <div>
+      <div>value: {counter.value}</div>
+      <button onClick={counter.increase}>increase value</button>
+    </div>;
+  };
+  const Counter2 = () => {
+    const counter = useCounter();
+    return <div>
+      <div>value2: {counter.value}</div>
+    </div>;
+  };
+  const {getByText} = render(
+    <div>
+      <Counter />
+      <Counter2 />
+    </div>
+  );
 
-// test('support async class methods', async () => {
-//   const getDataAsync = function () {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         resolve(77);
-//       }, 200);
-//     });
-//   };
+  expect(getByText(/value:/)).toHaveTextContent('value: 0');
 
-//   class Store {
-//     value = 0
-//     async changeData () {
-//       this.value = await getDataAsync();
-//     }
-//   }
-//   const Counter = injectStore('counter')(
-//     ({counter}) => {
-//       return <div>
-//         <div>value: {counter.value}</div>
-//         <button onClick={counter.changeData}>change value</button>
-//       </div>;
-//     }
-//   );
-//   const {getByText} = render(
-//     <Provider stores={{counter: new Store()}}><Counter /></Provider>
-//   );
-
-//   expect(getByText(/value:/)).toHaveTextContent('value: 0');
-
-//   Simulate.click(getByText(/change value/));
-//   await wait(() => {
-//     expect(getByText(/value:/)).toHaveTextContent('value: 77');
-//   }, {timeout: 300});
-// });
-
-// test('method returns after state change', async () => {
-//   let methodResult;
-//   let counterValueAfterMethod;
-
-//   class Store {
-//     value = 0
-//     changeData () {
-//       this.value = 77;
-
-//       return 42;
-//     }
-//   }
-
-//   class Comp extends React.Component {
-//     handleClick = async () => {
-//       methodResult = await this.props.counter.changeData();
-//       counterValueAfterMethod = this.props.counter.value;
-//     }
-
-//     render () {
-//       return <div>
-//         <div>value: {this.props.counter.value}</div>
-//         <button onClick={this.handleClick}>change value</button>
-//       </div>;
-//     }
-//   }
-//   const Counter = injectStore('counter')(Comp);
-
-//   const {getByText} = render(
-//     <Provider stores={{counter: new Store()}}><Counter /></Provider>
-//   );
-
-//   expect(getByText(/value:/)).toHaveTextContent('value: 0');
-
-//   Simulate.click(getByText(/change value/));
-//   await wait();
-//   expect(methodResult).toEqual(42);
-//   expect(counterValueAfterMethod).toEqual(77);
-
-//   expect(getByText(/value:/)).toHaveTextContent('value: 77');
-// });
+  Simulate.click(getByText(/increase value/));
+  expect(getByText(/value:/)).toHaveTextContent('value: 1');
+  Simulate.click(getByText(/increase value/));
+  expect(getByText(/value:/)).toHaveTextContent('value: 2');
+  expect(getByText(/value2:/)).toHaveTextContent('value: 2');
+});
